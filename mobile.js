@@ -1,63 +1,62 @@
 class OneFingerDrag {
   constructor(element) {
     this.element = element;
-    this.startX = 0;
-    this.startY = 0;
-    this.offsetX = 0;
-    this.offsetY = 0;
-    this.currentX = 0;
-    this.currentY = 0;
-    this.isDragging = false;
+    this.startX = 0; // Starting X position
+    this.startY = 0; // Starting Y position
+    this.offsetX = 0; // Offset X for transform
+    this.offsetY = 0; // Offset Y for transform
+    this.isDragging = false; // Dragging state
 
     this.init();
   }
 
   init() {
-    // Touch start
+    // Touch start: Initiates the drag
     this.element.addEventListener("touchstart", (e) => this.onTouchStart(e), { passive: false });
 
-    // Touch move
+    // Touch move: Handles the drag movement
     this.element.addEventListener("touchmove", (e) => this.onTouchMove(e), { passive: false });
 
-    // Touch end
+    // Touch end: Stops the drag
     this.element.addEventListener("touchend", () => this.onTouchEnd());
 
-    // Touch cancel (e.g., when interrupted by notifications)
+    // Touch cancel: Handles interruptions (e.g., notifications)
     this.element.addEventListener("touchcancel", () => this.onTouchEnd());
   }
 
   onTouchStart(e) {
-    e.preventDefault(); // Prevent scrolling during interaction
-    const touch = e.touches[0];
+    e.preventDefault(); // Prevent default scrolling behavior
+    const touch = e.touches[0]; // Get the first touch point
 
-    // Save the starting position
+    // Save the initial touch point and offset
     this.startX = touch.clientX - this.offsetX;
     this.startY = touch.clientY - this.offsetY;
 
-    this.isDragging = true;
+    this.isDragging = true; // Set dragging state
   }
 
   onTouchMove(e) {
     if (!this.isDragging) return;
 
-    e.preventDefault(); // Prevent scrolling during interaction
-    const touch = e.touches[0];
+    e.preventDefault(); // Prevent scrolling during the drag
+    const touch = e.touches[0]; // Get the first touch point
 
     // Calculate the new position
-    this.currentX = touch.clientX - this.startX;
-    this.currentY = touch.clientY - this.startY;
+    const newX = touch.clientX - this.startX;
+    const newY = touch.clientY - this.startY;
 
-    // Apply the translation
-    this.offsetX = this.currentX;
-    this.offsetY = this.currentY;
+    // Update the offsets
+    this.offsetX = newX;
+    this.offsetY = newY;
 
-    this.element.style.transform = `translate(${this.currentX}px, ${this.currentY}px)`;
+    // Apply the translation to the element
+    this.element.style.transform = `translate(${newX}px, ${newY}px)`;
   }
 
   onTouchEnd() {
-    this.isDragging = false; // Stop dragging
+    this.isDragging = false; // Reset dragging state
   }
 }
 
-// Apply the OneFingerDrag functionality to all elements with the class "paper"
+// Apply the drag functionality to all elements with the class "paper"
 document.querySelectorAll(".paper").forEach((paper) => new OneFingerDrag(paper));
