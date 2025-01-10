@@ -1,63 +1,77 @@
-let highestZ = 1;
+let activeTouches = [];
+let startMidPoint = { x: 0, y: 0 };
+let currentTransform = { x: 0, y: 0 };
 
-class MobilePaper {
-  constructor(paper) {
-    this.paper = paper;
-    this.startX = 0;
-    this.startY = 0;
-    this.currentX = 0;
-    this.currentY = 0;
-    this.offsetX = 0;
-    this.offsetY = 0;
-    this.rotation = Math.random() * 30 - 15;
-    this.holding = false;
-
+class TwoFingerDrag {
+  constructor(element) {
+    this.element = element;
     this.init();
   }
 
   init() {
-    // Touchstart: Start dragging
-    this.paper.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
-
-    // Touchmove: Continue dragging
-    this.paper.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
-
-    // Touchend: Stop dragging
-    this.paper.addEventListener('touchend', () => this.onTouchEnd());
+    this.element.addEventListener("touchstart", (e) => this.onTouchStart(e), { passive: false });
+    this.element.addEventListener("touchmove", (e) => this.onTouchMove(e), { passive: false });
+    this.element.addEventListener("touchend", (e) => this.onTouchEnd(e), { passive: false });
+    this.element.addEventListener("touchcancel", (e) => this.onTouchEnd(e), { passive: false });
   }
 
   onTouchStart(e) {
-    e.preventDefault(); // Prevent scrolling
-    const touch = e.touches[0];
+    e.preventDefault();
+    Array.from(e.touches).forEach((touch) => {
+      if (!activeTouches.some((t) => t.id === touch.identifier)) {
+        activeTouches.push({
+          id: touch.identifier,
+          x: touch.clientX,
+          y: touch.clientY,
+        });
+      }
+    });
 
-    this.holding = true;
-    this.startX = touch.clientX - this.offsetX;
-    this.startY = touch.clientY - this.offsetY;
-
-    // Raise z-index
-    this.paper.style.zIndex = ++highestZ;
+    if (activeTouches.length === 2) {
+      startMidPoint = this.calculateMidPoint();
+    }
   }
 
   onTouchMove(e) {
-    if (!this.holding) return;
+    e.preventDefault();
+    if (activeTouches.length === 2) {
+      Array.from(e.touches).forEach((touch) => {
+        const index = activeTouches.findIndex((t) => t.id === touch.identifier);
+        if (index > -1) {
+          activeTouches[index].x = touch.clientX;
+          activeTouches[index].y = touch.clientY;
+        }
+      });
 
-    e.preventDefault(); // Prevent scrolling
-    const touch = e.touches[0];
+      const newMidPoint = this.calculateMidPoint();
+      const deltaX = newMidPoint.x - startMidPoint.x;
+      const deltaY = newMidPoint.y - startMidPoint.y;
 
-    this.currentX = touch.clientX - this.startX;
-    this.currentY = touch.clientY - this.startY;
+      currentTransform.x += deltaX;
+      currentTransform.y += deltaY;
 
-    // Update position
-    this.offsetX = this.currentX;
-    this.offsetY = this.currentY;
-
-    this.paper.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotateZ(${this.rotation}deg)`;
+      this.element.style.transform = `translate(${currentTransform.x}px, ${currentTransform.y}px)`;
+      startMidPoint = newMidPoint;
+    }
   }
 
-  onTouchEnd() {
-    this.holding = false;
+  onTouchEnd(e) {
+    e.preventDefault();
+    const remainingTouches = Array.from(e.touches);
+    activeTouches = activeTouches.filter((t) =>
+      remainingTouches.some((touch) => touch.identifier === t.id)
+    );
+  }
+
+  calculateMidPoint() {
+    if (activeTouches.length !== 2) return { x: 0, y: 0 };
+    const [touch1, touch2] = activeTouches;
+    return {
+      x: (touch1.x + touch2.x) / 2,
+      y: (touch1.y + touch2.y) / 2,
+    };
   }
 }
 
-// Apply the MobilePaper functionality to all elements with the class "paper"
-document.querySelectorAll('.paper').forEach((paper) => new MobilePaper(paper));
+// Apply the TwoFingerDrag functionality to all elements with the class "paper"
+document.querySelectorAll(".paper").forEach((paper) => new TwoFingerDrag(paper));
