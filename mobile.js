@@ -1,56 +1,63 @@
 let highestZ = 1;
 
 class MobilePaper {
-  holdingPaper = false;
-  startX = 0;
-  startY = 0;
-  currentX = 0;
-  currentY = 0;
-  offsetX = 0;
-  offsetY = 0;
-  rotation = Math.random() * 30 - 15;
+  constructor(paper) {
+    this.paper = paper;
+    this.startX = 0;
+    this.startY = 0;
+    this.currentX = 0;
+    this.currentY = 0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.rotation = Math.random() * 30 - 15;
+    this.holding = false;
 
-  init(paper) {
-    paper.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      this.holdingPaper = true;
+    this.init();
+  }
 
-      // Record initial positions
-      this.startX = touch.clientX - this.offsetX;
-      this.startY = touch.clientY - this.offsetY;
+  init() {
+    // Touchstart: Start dragging
+    this.paper.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
 
-      // Raise paper to the highest z-index
-      paper.style.zIndex = ++highestZ;
+    // Touchmove: Continue dragging
+    this.paper.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
 
-      e.preventDefault(); // Prevent scrolling.
-    });
+    // Touchend: Stop dragging
+    this.paper.addEventListener('touchend', () => this.onTouchEnd());
+  }
 
-    paper.addEventListener('touchmove', (e) => {
-      if (!this.holdingPaper) return;
+  onTouchStart(e) {
+    e.preventDefault(); // Prevent scrolling
+    const touch = e.touches[0];
 
-      const touch = e.touches[0];
-      this.currentX = touch.clientX - this.startX;
-      this.currentY = touch.clientY - this.startY;
+    this.holding = true;
+    this.startX = touch.clientX - this.offsetX;
+    this.startY = touch.clientY - this.offsetY;
 
-      // Apply transform
-      paper.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotateZ(${this.rotation}deg)`;
+    // Raise z-index
+    this.paper.style.zIndex = ++highestZ;
+  }
 
-      // Store offsets for continuity
-      this.offsetX = this.currentX;
-      this.offsetY = this.currentY;
+  onTouchMove(e) {
+    if (!this.holding) return;
 
-      e.preventDefault(); // Prevent scrolling during dragging.
-    });
+    e.preventDefault(); // Prevent scrolling
+    const touch = e.touches[0];
 
-    paper.addEventListener('touchend', () => {
-      this.holdingPaper = false;
-    });
+    this.currentX = touch.clientX - this.startX;
+    this.currentY = touch.clientY - this.startY;
+
+    // Update position
+    this.offsetX = this.currentX;
+    this.offsetY = this.currentY;
+
+    this.paper.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotateZ(${this.rotation}deg)`;
+  }
+
+  onTouchEnd() {
+    this.holding = false;
   }
 }
 
-// Apply to all papers
-const papers = document.querySelectorAll('.paper');
-papers.forEach((paper) => {
-  const mobilePaper = new MobilePaper();
-  mobilePaper.init(paper);
-});
+// Apply the MobilePaper functionality to all elements with the class "paper"
+document.querySelectorAll('.paper').forEach((paper) => new MobilePaper(paper));
