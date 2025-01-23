@@ -1,45 +1,61 @@
 @import url('https://fonts.googleapis.com/css2?family=Zeyada&display=swap');
 
-
-
-
 body {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background-size: 1000px;
+  background-size: cover;
   background-image: url("https://www.psdgraphics.com/wp-content/uploads/2020/09/weathered-paper-texture.jpg");
   background-position: center center;
+  margin: 0;
+  overflow: hidden;
 }
 
 .paper {
   background-image: url("https://www.psdgraphics.com/wp-content/uploads/2021/04/old-brown-paper-background.jpg");
-  background-size: 500px;
-  background-position: center center;
+  background-size: cover;
   padding: 20px 100px;
-/*  min-width: 800px; */
-  
   transform: rotateZ(-5deg);
-  box-shadow: 1px 15px 20px 0px rgba(0,0,0,0.5);
-  
+  box-shadow: 1px 15px 20px 0 rgba(0, 0, 0, 0.5);
   position: absolute;
+  touch-action: none; /* Prevent browser gestures during drag */
+}
+
+.paper.video {
+  padding: 20px;
+  text-align: center;
+}
+
+.paper.video iframe {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 1px 10px 15px rgba(0, 0, 0, 0.5);
 }
 
 .paper.heart {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 300px;
+  height: 300px;
   padding: 0;
   border-radius: 60%;
 }
 
-.paper.image {
-  padding: 10px;
-}
-.paper.image p {
-  font-size: 45px;
+.paper.heart::after {
+  content: "";
+  background-image: url('https://cdn.pixabay.com/photo/2016/03/31/19/25/cartoon-1294994__340.png');
+  background-size: contain;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.8;
 }
 
 img {
@@ -48,26 +64,29 @@ img {
   user-select: none;
 }
 
-.paper.heart::after {
-  content: "";
-  background-image: url('https://cdn.pixabay.com/photo/2016/03/31/19/25/cartoon-1294994__340.png');
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-size: 250px;
-  background-position: center center;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-}
-
 p {
-  font-family: 'Zeyada';
+  font-family: 'Zeyada', cursive, sans-serif;
   font-size: 50px;
-  color: rgb(0,0,100);
+  color: rgb(0, 0, 100);
   opacity: 0.75;
   user-select: none;
-  
-  filter: drop-shadow(2px 1.5px 1px rgba(0,0,105,0.9));
+  filter: drop-shadow(2px 1.5px 1px rgba(0, 0, 105, 0.9));
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .paper {
+    padding: 10px 20px;
+    transform: none;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .paper.heart {
+    width: 250px;
+    height: 250px;
+  }
+
+  p {
+    font-size: 30px;
+  }
 }
